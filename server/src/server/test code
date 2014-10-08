@@ -1,0 +1,58 @@
+
+//UsersList ul = new UsersList();
+//ul.read();
+//System.out.println(ul.getUsers().get(2).getEmail());
+/*ul.addUser("nick3", "asdf@mail.ua");
+ul.addUser("nick1", "asdf@mail.ua");
+ul.addUser("nick2", "asdf@mail.ua");
+ul.addUser("nick5", "asdf@mail.ua");
+ul.write();*/
+
+//cp.read();
+/*cp.addPointWithTarget(7, 10, 4);
+cp.addPointWithTarget(3, 6, 7);
+cp.addPointWithTarget(6, 3, 7);*/
+
+/*cp.setCount(10);
+
+for (int i = 0; i<cp.getCount()+1; i++){
+	cp.getPoints().add(new Point(i));
+}
+
+cp.addPointWithTarget(1, 4, 5);
+cp.addPairToLastPoint(5, 5);
+cp.addPointWithTarget(1, 4, 5);
+cp.addPairToLastPoint(5, 5);
+cp.addPointWithTarget(2, 6, 8);
+cp.addPointWithTarget(3, 0, 0);	
+cp.addPointWithTarget(4, 1, 4);
+cp.addPointWithTarget(5, 1, 5);
+cp.addPairToLastPoint(6, 6);
+cp.addPairToLastPoint(8, 7);
+cp.addPairToLastPoint(10, 1);
+cp.addPointWithTarget(6, 2, 8);
+cp.addPairToLastPoint(5, 6);
+cp.addPointWithTarget(7, 0, 0);
+cp.addPointWithTarget(8, 5, 7);
+cp.addPointWithTarget(9, 10, 3);
+cp.addPointWithTarget(10, 5, 1);
+cp.addPairToLastPoint(9, 3);
+cp.write();*/
+
+/*cp.read();
+ */ 
+/*CheckPoints cp = new CheckPoints();
+
+System.out.println(cp.getCount());
+for (int i = 0; i<cp.getCount()+1; i++){
+	System.out.print("Id = "+i);
+	HashMap<Integer, Integer> temp = cp.getPoints().get(i).getPair();
+	for(Entry<Integer, Integer> t: temp.entrySet()) {
+		System.out.println("[" + t.getKey() + ":" + t.getValue()+"]");
+		
+	}
+}
+cp.write();
+System.out.println(cp.getCostRide(7, 8));
+System.out.println("done!");
+*/
