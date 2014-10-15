@@ -5,111 +5,212 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import org.apache.log4j.Logger;
 
 import server.checkPointsData.CheckPoints;
+import server.userData.UserWayList;
 import server.userData.UsersList;
 
+/**
+ * Class server listening socket
+ * initialize the checkPoints on init request
+ * add request to the queue for further work
+ * 
+ * 
+ * @author Admin
+ *
+ */
 public class Server implements Runnable{
+	private static final Logger log = Logger.getLogger(Server.class);
+	
 
-	int port = 7890;
-	ServerSocket serverSocket;
-	Socket socket;
-	UsersList userList;
-	CheckPoints checkPoints;
-	WayList wayList;
+	private int port = 7890;//port id
+	private ServerSocket serverSocket;//server socket for listening incom connection requests
+	private Socket socket;//socket for updates
+	private CheckPoints checkPoints;
 	
 	
-	InputStream is;
-	OutputStream os;
-	HashMap<Integer, ClientProcessor> clients = new HashMap<Integer, ClientProcessor>();
-
-	public Server(){
-		userList = new UsersList();
-		checkPoints = new CheckPoints();
-		wayList = new WayList(checkPoints);
+	private InputStream is;
+	private OutputStream os;
+	
+	private boolean[] checkPointsOnline;
+	
+	/**
+	 * use for adding requests in queue on work 
+	 */
+	private ConcurrentLinkedQueue<HashMap<String, String>> requests = new ConcurrentLinkedQueue<HashMap<String, String>>();
+	
+	/**
+	 * create server class instance with set port 
+	 * @param port
+	 * @param ul
+	 * @param cp
+	 * @param requests
+	 */
+	public Server(int port, CheckPoints cp, ConcurrentLinkedQueue<HashMap<String, String>> requests){
+		this.port = port;
+		this.checkPoints = cp;
+		this.checkPointsOnline = new boolean[this.checkPoints.getCount()];
+		this.requests = requests;
+		for (int i=0;i<this.checkPoints.getCount();i++){
+			this.checkPointsOnline[i]=false;//all check points aren`t registered on system
+			System.out.println(this.checkPointsOnline[i]);
+		}
 		initialization();
 	}
 	
-	public Server(int port){
-		this.port=port;
+	/**
+	 * create server class instance with default port
+	 * @param ul
+	 * @param cp
+	 * @param requests
+	 */
+	public Server(CheckPoints cp, ConcurrentLinkedQueue<HashMap<String, String>> requests){
+		this.checkPoints = cp;
+		this.checkPointsOnline = new boolean[this.checkPoints.getCount()];
+		this.requests = requests;
+		for (int i=0;i<this.checkPoints.getCount();i++){
+			this.checkPointsOnline[i]=false;//all check points aren`t registered on system
+			System.out.println(this.checkPointsOnline[i]);
+		}
 		initialization();
 	}
 
 	private void initialization() {
-		this.userList.read();
 		
-		this.checkPoints.read();
 	}
 	
-	void parse(Socket s, HashMap<String, String> parameters, HashMap<Integer, ClientProcessor> clientsProcessors) {
+	/**
+	 * 
+	 * @param s
+	 * @param parameters
+	 */
+	void parse(Socket s, HashMap<String, String> parameters, ConcurrentLinkedQueue<HashMap<String, String>> requests) {
 		HashMap<String, String> answerParameters = new HashMap<String, String>();
+		String answer;
 		if (parameters.size()<2){ //if we have no much parametrs in collections send back error
 			try {
 				ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
-				String answer = "Wrong count of args!";
+				answer = "Wrong count of args!";
 				answerParameters.put("command", "error");
 				answerParameters.put("message", answer);
 				os.writeObject(answerParameters);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e);
 			}
 		} else { //if enough parameters 
 			switch (parameters.get("command")) {
 			case "init":
 				int id = Integer.valueOf(parameters.get("pointId"));
-				if (Integer.valueOf(parameters.get("pointId"))!=0) {//
-					if (clients.get(id)!=null) {
-						String answer = "Current Id alredy in system.";
+				if (id!=0) {//
+					System.out.println(onSystem(id));
+					if (onSystem(id)) {//already online
+						answer = "Current Id = "+id+" alredy in system.";
 						answerParameters.put("command", "error");
 						answerParameters.put("message", answer);
+						System.out.println(answer);
 						try {
 							ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
 							os.writeObject(answerParameters);
+							os.flush();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
-							e.printStackTrace();
+							log.error(e);
 						}
 						
-					} else {//
-						//add the checkpoint processor for implement functionality 
-						ClientProcessor tempProcessor = new ClientProcessor(id, s, userList, checkPoints, wayList);
-						clientsProcessors.put(id, tempProcessor);
-						Thread t = new Thread(tempProcessor);
-						t.setPriority(Thread.NORM_PRIORITY);
-						t.start(); 
-						System.out.println("Thread "+t.toString()+ " start for client if "+id);
-						String answer = "Checkpoit is add";
-						answerParameters.put("command", "succes");
-						answerParameters.put("message", answer);
-						try {
-							ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
-							os.writeObject(answerParameters);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+					} else {
+						//add mark for check point as online registred
+						this.checkPointsOnline[id-1] = true;
+						System.out.println("Got new checkPoint");
 					}
-				//
-				} else if (Integer.valueOf(parameters.get("pointId"))==0){ //if pointID=0 then send back error
-					String answer = parameters.get("pointId")+" is wrong Id";
+				} else if (id==0){ //if pointID=0 then send back error
+					answer = parameters.get("pointId")+" is wrong Id";
 					answerParameters.put("command", "error");
 					answerParameters.put("message", answer);
 					try {
 						ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
 						os.writeObject(answerParameters);
+						os.flush();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						log.error(e);
 					}
 				}
 				break;
 				
+			case "in":
+				//get in command on message 
+				
+				requests.add(parameters);
+				
+				answer = parameters.get("command")+" with clientId" +parameters.get("clientId") + " is successful added";
+				answerParameters.put("command", "success");
+				answerParameters.put("message", answer);
+				try {
+					ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
+					os.writeObject(answerParameters);
+					os.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					log.error(e);
+				}
+				break;
+				
+			case "across":
+				//get across command on message 
+				requests.add(parameters);
+				
+				answer = parameters.get("command")+" with clientId" +parameters.get("clientId") + " is successful added";
+				answerParameters.put("command", "success");
+				answerParameters.put("message", answer);
+				try {
+					ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
+					os.writeObject(answerParameters);
+					os.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					log.error(e);
+				}
+				break;
+				
+			case "out":
+				//get out command on message 
+				requests.add(parameters);
+				
+				answer = parameters.get("command")+" with clientId" +parameters.get("clientId") + " is successful added";
+				answerParameters.put("command", "success");
+				answerParameters.put("message", answer);
+				try {
+					ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
+					os.writeObject(answerParameters);
+					os.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					log.error(e);
+				}
+				break;
+				
 			default:
+				//uknown command feedback
+				answer = parameters.get("command")+" is uknown command!";
+				answerParameters.put("command", "error");
+				answerParameters.put("message", answer);
+				try {
+					ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
+					os.writeObject(answerParameters);
+					os.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					log.error(e);
+				}
 				break;
 			}
 		}
@@ -124,27 +225,32 @@ public class Server implements Runnable{
 			System.out.println("Sercer Socket Init on port " + this.port);
 			
 			while(true){
-				System.out.println("W8 client");
-				socket = serverSocket.accept();
+				System.out.println("W8 request");
+				this.socket = serverSocket.accept();
 				
-				System.out.println("Got client");
-							
-				is = socket.getInputStream();
-				os = socket.getOutputStream();
+				System.out.println("Got request");			
+				this.is = socket.getInputStream();
 				
 				HashMap<String, String> parameters = new HashMap<String, String>();
 				
 				ObjectInputStream oos = new ObjectInputStream(is);
 				parameters = (HashMap<String, String>)oos.readObject();
 				
-				System.out.println("Got data");
-				parse(socket, parameters, clients);
-				//socket.close();
+				System.out.println("Got data!"); 
+				
+				//parse input data  ---- notifications
+				parse(this.socket, parameters, this.requests);
+				this.socket.close();
 				//serverSocket.close();
 			}
 		} catch (Exception e){
-			e.printStackTrace();
+			log.error(e);
 		}
 		
 	}
+	
+	private boolean onSystem(int id){
+		return this.checkPointsOnline[id-1];
+	}
+
 }

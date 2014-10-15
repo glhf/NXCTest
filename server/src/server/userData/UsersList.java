@@ -23,66 +23,22 @@ import server.interfaces.*;
  */
 @XmlRootElement(name="usersList")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class UsersList implements Xmlable{
+public class UsersList {
 	@XmlElement(name="users")
 	private ArrayList<User> users = new ArrayList<>();
 	
-	private void initialization(){
-		File f = new File(Xmlable.pathUsersData);
-		if (f.exists()) {
-			this.read();
-		} else {
-			//init walues
-			this.addUser("nick3", "asdf@mail.ua");
-			this.addUser("nick1", "asdf@mail.ua");
-			this.addUser("nick2", "asdf@mail.ua");
-			this.addUser("nick5", "asdf@mail.ua");
-			this.write();
-		}
-		
+	public void initialization(){
+		//init walues
+		this.addUser("nick3", "asdf@mail.ua");
+		this.addUser("nick1", "asdf@mail.ua");
+		this.addUser("nick2", "asdf@mail.ua");
+		this.addUser("nick5", "asdf@mail.ua");
 	}
 	
 	public UsersList(){
-		//initialization();
-	}
-	
-	@Override
-	public synchronized void read() {
-		// unmarshal xml method
-		try {
-			JAXBContext jc = JAXBContext.newInstance(UsersList.class);
-			Unmarshaller um = jc.createUnmarshaller();
-			File f = new File(Xmlable.pathUsersData);
-			UsersList temp = (UsersList)um.unmarshal(f);
-			this.setUsers(temp.getUsers());
-		} catch (JAXBException ex){
-			ex.printStackTrace();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}	
 		
 	}
-
-	@Override
-	public void write() {
-		// marshal xml method
-		try {
-			JAXBContext jc = JAXBContext.newInstance(UsersList.class);
-			Marshaller m = jc.createMarshaller();
-			FileOutputStream fs = new FileOutputStream(new File(Xmlable.pathUsersData));
-			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			m.marshal(this, fs);
-			fs.close();
-		} catch (IOException ex) {
-			//insert sf4j log elements
-			System.out.println(ex.toString());
-		} catch (JAXBException ex){
-			System.out.println(ex.toString());
-		} catch (Exception ex) {
-			System.out.println(ex.toString());
-		}
-	}	
-
+	
 	public ArrayList<User> getUsers() {
 		return users;
 	}

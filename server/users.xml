@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<usersList>
+    <users>
+        <id>0</id>
+        <name>nick3</name>
+        <email>asdf@mail.ua</email>
+    </users>
+    <users>
+        <id>1</id>
+        <name>nick1</name>
+        <email>asdf@mail.ua</email>
+    </users>
+    <users>
+        <id>2</id>
+        <name>nick2</name>
+        <email>asdf@mail.ua</email>
+    </users>
+    <users>
+        <id>3</id>
+        <name>nick5</name>
+        <email>asdf@mail.ua</email>
+    </users>
+</usersList>

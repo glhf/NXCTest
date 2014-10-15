@@ -9,20 +9,21 @@ import java.util.HashMap;
 
 import server.checkPointsData.CheckPoints;
 import server.userData.UsersList;
+import server.userData.UserWayList;
 
 public class ClientProcessor implements Runnable{
 	int pointId;
 	Socket socket;
 	UsersList userList;
 	CheckPoints checkPionts;
-	WayList wayList;
+	UserWayList wayList;
 	
 	InputStream is;
 	OutputStream os;
 	
 	
 	public ClientProcessor(int id, Socket socket, UsersList userList,
-			CheckPoints checkPionts, WayList waylist) {
+			CheckPoints checkPionts, UserWayList waylist) {
 		super();
 		this.pointId = id;
 		this.socket = socket;
@@ -84,10 +85,10 @@ public class ClientProcessor implements Runnable{
 	public void setCheckPionts(CheckPoints checkPionts) {
 		this.checkPionts = checkPionts;
 	}
-	public WayList getWayList() {
+	public UserWayList getWayList() {
 		return wayList;
 	}
-	public void setWayList(WayList wayList) {
+	public void setWayList(UserWayList wayList) {
 		this.wayList = wayList;
 	}
 }

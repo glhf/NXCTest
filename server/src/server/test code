@@ -55,4 +55,29 @@ for (int i = 0; i<cp.getCount()+1; i++){
 cp.write();
 System.out.println(cp.getCostRide(7, 8));
 System.out.println("done!");
+
+
+
+
+
+
+
+
+
+if (!(new java.io.File(server.interfaces.Xmlable.PATH_CHECK_POINTS_DATA)).exists()){
+			try {
+				CheckPointsReader cpr = new CheckPointsReader();
+				cpr.setTemp(cp);
+				cpr.write();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				log.error("Can`t reslove path ", e);
+			} catch (JAXBException e) {
+				// TODO Auto-generated catch block
+				log.error("Marshal error ", e);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				log.error("IO Exeption ",e);
+			}
+		}
 */

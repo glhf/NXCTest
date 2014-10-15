@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -37,7 +38,7 @@ import server.interfaces.Xmlable;
  */
 @XmlRootElement(name="pointsList")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CheckPoints implements Xmlable{
+public class CheckPoints{
 	private static int lastAddIndex=0;
 	@XmlElement(name="directed")
 	private boolean directed=false; 
@@ -47,39 +48,27 @@ public class CheckPoints implements Xmlable{
 	private ArrayList<Point> points = new ArrayList<Point>();
 	
 	//init method for start values for road systems
-	private void initialization(){
-		File f = new File(Xmlable.pathCheckPointsData);
-		if (f.exists()) {
-			this.read();
-		} else {
-			//init walues
-			
+	public void initialization(){
 			for (int i=0; i<this.getCount()+1; i++){
 				this.points.add(i, new Point(i));
-			}
-			
-			this.addPointWithTarget(1, 4, 4);//1
+			}			
+			this.addPointWithTarget(1, 4, 4);
 			this.addPairToLastPoint(5, 5);
 			this.addPointWithTarget(2, 6, 8);
 			this.addPointWithTarget(3, 6, 7);	
 			this.addPointWithTarget(5, 6, 6);
 			this.addPairToLastPoint(8, 7);
 			this.addPairToLastPoint(10, 1);
-			this.addPointWithTarget(10, 7, 4);//9
-			this.addPairToLastPoint(9, 3);
-			this.write();
-		}
-		
+			this.addPointWithTarget(10, 7, 4);
+			this.addPairToLastPoint(9, 3);		
 	}
-	//Constructors
 	
 	public CheckPoints(){
-		//initialization();
+		
 	}
 	
 	public CheckPoints(boolean directed){
-		this.directed=directed;
-		
+		this.directed=directed;	
 	}
 	
 	//method for get cost of ride frop A point to B point
@@ -94,7 +83,7 @@ public class CheckPoints implements Xmlable{
 		if(this.getPoints().get(a).getPair().get(b)==null) throw new IllegalArgumentException("No way from "+a
 																							 +" point to "+b+" point");
 		int rez=0;
-		//add exeption - path not faund
+		//add exeption - path not found
 		
 		rez = this.getPoints().get(a).getPair().get(b);
 		
@@ -171,46 +160,6 @@ public class CheckPoints implements Xmlable{
 			this.getPoints().get(where).addPair(CheckPoints.lastAddIndex, cost);
 		} else {
 			this.getPoints().get(CheckPoints.lastAddIndex).addPair(where, cost);
-		}
-	}
-	
-	//xmlable methods for serialize data with XML
-	@Override
-	public synchronized void read() {
-		// unmarshal xml method
-		try {
-			JAXBContext jc = JAXBContext.newInstance(CheckPoints.class);
-			Unmarshaller um = jc.createUnmarshaller();
-			File f = new File(Xmlable.pathCheckPointsData);
-			CheckPoints temp = (CheckPoints)um.unmarshal(f);
-			this.setPoints(temp.getPoints());
-			this.setCount(temp.getCount());
-			
-		} catch (JAXBException ex){
-			ex.printStackTrace();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}	
-		
-	}
-
-	@Override
-	public void write() {
-		// marshal xml method
-		try {
-			JAXBContext jc = JAXBContext.newInstance(CheckPoints.class);
-			Marshaller m = jc.createMarshaller();
-			FileOutputStream fs = new FileOutputStream(new File(Xmlable.pathCheckPointsData));
-			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			m.marshal(this, fs);
-			fs.close();
-		} catch (IOException ex) {
-			//insert sf4j log elements
-			System.out.println(ex.toString());
-		} catch (JAXBException ex){
-			System.out.println(ex.toString());
-		} catch (Exception ex) {
-			System.out.println(ex.toString());
 		}
 	}
 	
