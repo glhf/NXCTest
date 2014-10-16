@@ -61,7 +61,6 @@ public class Server implements Runnable{
 		this.requests = requests;
 		for (int i=0;i<this.checkPoints.getCount();i++){
 			this.checkPointsOnline[i]=false;//all check points aren`t registered on system
-			System.out.println(this.checkPointsOnline[i]);
 		}
 		initialization();
 	}
@@ -78,7 +77,6 @@ public class Server implements Runnable{
 		this.requests = requests;
 		for (int i=0;i<this.checkPoints.getCount();i++){
 			this.checkPointsOnline[i]=false;//all check points aren`t registered on system
-			System.out.println(this.checkPointsOnline[i]);
 		}
 		initialization();
 	}
@@ -92,16 +90,15 @@ public class Server implements Runnable{
 	 * @param s
 	 * @param parameters
 	 */
-	void parse(Socket s, HashMap<String, String> parameters, ConcurrentLinkedQueue<HashMap<String, String>> requests) {
+	void parse(ObjectOutputStream stream, HashMap<String, String> parameters, ConcurrentLinkedQueue<HashMap<String, String>> requests) {
 		HashMap<String, String> answerParameters = new HashMap<String, String>();
 		String answer;
 		if (parameters.size()<2){ //if we have no much parametrs in collections send back error
 			try {
-				ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
 				answer = "Wrong count of args!";
 				answerParameters.put("command", "error");
 				answerParameters.put("message", answer);
-				os.writeObject(answerParameters);
+				stream.writeObject(answerParameters);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				log.error(e);
@@ -110,17 +107,14 @@ public class Server implements Runnable{
 			switch (parameters.get("command")) {
 			case "init":
 				int id = Integer.valueOf(parameters.get("pointId"));
-				if (id!=0) {//
-					System.out.println(onSystem(id));
+				if (id!=0) {
 					if (onSystem(id)) {//already online
 						answer = "Current Id = "+id+" alredy in system.";
 						answerParameters.put("command", "error");
 						answerParameters.put("message", answer);
 						System.out.println(answer);
 						try {
-							ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
-							os.writeObject(answerParameters);
-							os.flush();
+							stream.writeObject(answerParameters);
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							log.error(e);
@@ -130,15 +124,23 @@ public class Server implements Runnable{
 						//add mark for check point as online registred
 						this.checkPointsOnline[id-1] = true;
 						System.out.println("Got new checkPoint");
+						answer = "Current Id = "+id+" authorize.";
+						answerParameters.put("command", "success");
+						answerParameters.put("message", answer);
+						System.out.println(answer);
+						try {
+							stream.writeObject(answerParameters);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							log.error(e);
+						}
 					}
 				} else if (id==0){ //if pointID=0 then send back error
 					answer = parameters.get("pointId")+" is wrong Id";
 					answerParameters.put("command", "error");
 					answerParameters.put("message", answer);
 					try {
-						ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
-						os.writeObject(answerParameters);
-						os.flush();
+						stream.writeObject(answerParameters);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						log.error(e);
@@ -155,9 +157,7 @@ public class Server implements Runnable{
 				answerParameters.put("command", "success");
 				answerParameters.put("message", answer);
 				try {
-					ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
-					os.writeObject(answerParameters);
-					os.flush();
+					stream.writeObject(answerParameters);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					log.error(e);
@@ -172,9 +172,7 @@ public class Server implements Runnable{
 				answerParameters.put("command", "success");
 				answerParameters.put("message", answer);
 				try {
-					ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
-					os.writeObject(answerParameters);
-					os.flush();
+					stream.writeObject(answerParameters);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					log.error(e);
@@ -189,9 +187,7 @@ public class Server implements Runnable{
 				answerParameters.put("command", "success");
 				answerParameters.put("message", answer);
 				try {
-					ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
-					os.writeObject(answerParameters);
-					os.flush();
+					stream.writeObject(answerParameters);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					log.error(e);
@@ -204,9 +200,7 @@ public class Server implements Runnable{
 				answerParameters.put("command", "error");
 				answerParameters.put("message", answer);
 				try {
-					ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
-					os.writeObject(answerParameters);
-					os.flush();
+					stream.writeObject(answerParameters);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					log.error(e);
@@ -221,26 +215,29 @@ public class Server implements Runnable{
 		// TODO Auto-generated method stub
 		try{
 			System.out.println("Server Started (method run)");
-			serverSocket = new ServerSocket(port);
+			this.serverSocket = new ServerSocket(port);
 			System.out.println("Sercer Socket Init on port " + this.port);
 			
 			while(true){
 				System.out.println("W8 request");
 				this.socket = serverSocket.accept();
 				
-				System.out.println("Got request");			
-				this.is = socket.getInputStream();
+				System.out.println("Got request");		
 				
+				this.is = this.socket.getInputStream();
+				this.os = this.socket.getOutputStream();
+				
+				ObjectOutputStream oos = new ObjectOutputStream(this.os);
+				ObjectInputStream ois = new ObjectInputStream(this.is);
 				HashMap<String, String> parameters = new HashMap<String, String>();
 				
-				ObjectInputStream oos = new ObjectInputStream(is);
-				parameters = (HashMap<String, String>)oos.readObject();
+				parameters = (HashMap<String, String>)ois.readObject();
 				
 				System.out.println("Got data!"); 
 				
 				//parse input data  ---- notifications
-				parse(this.socket, parameters, this.requests);
-				this.socket.close();
+				parse(oos, parameters, this.requests);
+				//this.socket.close();
 				//serverSocket.close();
 			}
 		} catch (Exception e){

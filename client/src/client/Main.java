@@ -40,28 +40,24 @@ public class Main {
 			s = new Socket(host, port);
 			System.out.println("Get conn...");
 			
-			
-			ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
 			ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-			
+			ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
 			
 			//initialization checkpoint with id
 			//get processor thread on server
 			HashMap<String, String> parameters = new HashMap<String, String>();
 			parameters.put("command", "init");
 			parameters.put("pointId", String.valueOf(pointId));
-			System.out.println("Send initialiation data...");
-			oos.writeObject(parameters);
-			oos.flush();
 			
+			oos.writeObject(parameters);
+			System.out.println("Send initialiation data...");
+			oos.flush();
+					
 			//get recent info if command = error 
+			parameters.clear();
 			System.out.println("Recive answe...");
 			parameters = (HashMap<String, String>) ois.readObject();
 			
-			
-			System.out.println(parameters.get("command"));
-			System.out.println(parameters.get("message"));
-			System.out.println((parameters.get("command")=="error"));
 			if (parameters.get("command").equals("error")){
 				System.out.println(parameters.get("message"));
 				System.out.println("exit...... ");
