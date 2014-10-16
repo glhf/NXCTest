@@ -101,12 +101,13 @@ public class Server implements Runnable{
 				stream.writeObject(answerParameters);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				log.error(e);
+				log.error("Fail ",e);
 			}
 		} else { //if enough parameters 
+			
 			switch (parameters.get("command")) {
 			case "init":
-				int id = Integer.valueOf(parameters.get("pointId"));
+				int id = Integer.valueOf(parameters.get("checkPointId"));
 				if (id!=0) {
 					if (onSystem(id)) {//already online
 						answer = "Current Id = "+id+" alredy in system.";
@@ -117,7 +118,7 @@ public class Server implements Runnable{
 							stream.writeObject(answerParameters);
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
-							log.error(e);
+							log.error("Fail ",e);
 						}
 						
 					} else {
@@ -132,19 +133,37 @@ public class Server implements Runnable{
 							stream.writeObject(answerParameters);
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
-							log.error(e);
+							log.error("Fail ",e);
 						}
 					}
-				} else if (id==0){ //if pointID=0 then send back error
-					answer = parameters.get("pointId")+" is wrong Id";
-					answerParameters.put("command", "error");
+				} else if (id==0){ //if checkPointId=0 then send back error
+					answer = parameters.get("")+" is wrong Id";
+					answerParameters.put("checkPointId", "error");
 					answerParameters.put("message", answer);
 					try {
 						stream.writeObject(answerParameters);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
-						log.error(e);
+						log.error("Fail ",e);
 					}
+				}
+				break;
+				
+			case "exit":
+				id = Integer.valueOf(parameters.get("checkPointId"));
+				System.out.println(id+ " off point ");
+				this.checkPointsOnline[id-1] = false;
+				System.out.println("checkPoint id = "+id+ " is offline ");
+				answer = "checkPoint id = "+id+ " is offline ";
+				answerParameters.put("command", "success");
+				answerParameters.put("message", answer);
+				System.out.println(answer);
+				try {
+					stream.writeObject(answerParameters);
+					this.socket.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					log.error("Fail ",e);
 				}
 				break;
 				
@@ -160,7 +179,7 @@ public class Server implements Runnable{
 					stream.writeObject(answerParameters);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					log.error(e);
+					log.error("Fail ",e);
 				}
 				break;
 				
@@ -175,7 +194,7 @@ public class Server implements Runnable{
 					stream.writeObject(answerParameters);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					log.error(e);
+					log.error("Fail ",e);
 				}
 				break;
 				
@@ -190,7 +209,7 @@ public class Server implements Runnable{
 					stream.writeObject(answerParameters);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					log.error(e);
+					log.error("Fail ",e);
 				}
 				break;
 				
@@ -203,7 +222,7 @@ public class Server implements Runnable{
 					stream.writeObject(answerParameters);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					log.error(e);
+					log.error("Fail ",e);
 				}
 				break;
 			}
@@ -241,7 +260,7 @@ public class Server implements Runnable{
 				//serverSocket.close();
 			}
 		} catch (Exception e){
-			log.error(e);
+			log.error("Fail ",e);
 		}
 		
 	}

@@ -47,7 +47,7 @@ public class Main {
 			//get processor thread on server
 			HashMap<String, String> parameters = new HashMap<String, String>();
 			parameters.put("command", "init");
-			parameters.put("pointId", String.valueOf(pointId));
+			parameters.put("checkPointId", String.valueOf(pointId));
 			
 			oos.writeObject(parameters);
 			System.out.println("Send initialiation data...");
@@ -94,7 +94,10 @@ public class Main {
 		System.out.println("Have "+cmd);
 		String[] split = cmd.split(" ");
 		int cmdInd = Integer.valueOf(split[0]);
-		int userId = Integer.valueOf(split[1]);
+		int userId = 0;
+		if (cmdInd!=0) {
+			userId = Integer.valueOf(split[1]);
+		}
 		
 		switch (cmdInd) {
 		case 1:
@@ -113,7 +116,9 @@ public class Main {
 			param.put("checkPointId", String.valueOf(pointId));
 			break;
 		case 0:
-			return;
+			param.put("command", "exit");
+			param.put("checkPointId", String.valueOf(pointId));
+			break;
 		default:
 			break;
 		}
@@ -124,7 +129,10 @@ public class Main {
 			s.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			log.error(e);
+			log.error("Fail!", e);
+		}
+		if (cmdInd==0) {
+			System.exit(0);
 		}
 		
 	}
@@ -135,7 +143,7 @@ public class Main {
 			oos.writeObject(param);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			log.error(e);
+			log.error("Fail!", e);
 		}
 	}
 	
@@ -149,10 +157,10 @@ public class Main {
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			log.error(e);
+			log.error("Fail!", e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			log.error(e);
+			log.error("Fail!", e);
 		}
 	}
 }
