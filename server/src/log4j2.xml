@@ -1,8 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
 Server log properties file
 Create journal log and error log appenders	
  -->
-<?xml vercion="1.0" encodint="UTF-8" ?>
-<log4j:configuration debug="false" xmlns:log4j="http://jakarta.apache.org/log4j">
-	
-</log4j:configuration> 
+<Configuration status="error" >
+	<Properties>
+		<Property name="log-path">logs</Property>
+	</Properties>
+	<Appenders> 
+		<RollingFile name="journal-roll-file" fileName="${log-path}/activity-journal.log" filePattern="${log-path}/activity-journal-%d.log">
+			<PatternLayout>
+				<pattern>[%-5level] %d{HH:mm:ss.SSS} [%t] [%c{2}] - %m%n</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            	<SizeBasedTriggeringPolicy size="1 MB" />
+			</Policies>
+		</RollingFile>
+		<RollingFile name="errors-roll-file" fileName="${log-path}/errors.log" filePattern="${log-path}/errors-%d.log">
+			<PatternLayout>
+				<pattern>[%-5level] %d{HH:mm:ss.SSS} [%t] [%c{2}] %n%m%n</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            	<SizeBasedTriggeringPolicy size="1 MB" />
+			</Policies>
+		</RollingFile>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{2} - %msg%n"/>
+		</Console>
+		
+	</Appenders>
+	<Loggers>
+		<Root level="error" additivity="true">
+			<appender-ref ref="console"/>		
+		</Root>
+		<Logger name="server" level="error" additivity="true">
+			<appender-ref ref="journal-roll-file" level="info"/>
+			<appender-ref ref="errors-roll-file" level="error"/>
+		</Logger>
+		<!--  <Logger name="server.Server" level="error" additivity="true">
+			<appender-ref ref="journal-roll-file" level="info"/>
+		</Logger>
+ 		-->
+		<Logger name="server.workers" level="error" additivity="true">
+			<appender-ref ref="journal-roll-file" level="info"/>
+			<appender-ref ref="errors-roll-file" level="error"/>
+		</Logger>
+	</Loggers>
+</Configuration> 

@@ -96,6 +96,7 @@ public class Server implements Runnable{
 				answerParameters.put("command", "error");
 				answerParameters.put("message", answer);
 				stream.writeObject(answerParameters);
+				log.trace(answer);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				log.error("Fail ",e);
@@ -110,7 +111,7 @@ public class Server implements Runnable{
 						answer = "Check point "+id+" alredy in system.";
 						answerParameters.put("command", "error");
 						answerParameters.put("message", answer);
-						System.out.println(answer);
+						log.trace(answer);
 						try {
 							stream.writeObject(answerParameters);
 						} catch (IOException e) {
@@ -125,7 +126,7 @@ public class Server implements Runnable{
 						answer = "Check point "+id+" authorize.";
 						answerParameters.put("command", "success");
 						answerParameters.put("message", answer);
-						System.out.println(answer);
+						log.trace(answer);
 						try {
 							stream.writeObject(answerParameters);
 						} catch (IOException e) {
@@ -137,6 +138,7 @@ public class Server implements Runnable{
 					answer = parameters.get("")+" is wrong Id";
 					answerParameters.put("checkPointId", "error");
 					answerParameters.put("message", answer);
+					log.trace(answer);
 					try {
 						stream.writeObject(answerParameters);
 					} catch (IOException e) {
@@ -154,7 +156,7 @@ public class Server implements Runnable{
 				answer = "checkPoint id = "+id+ " is offline ";
 				answerParameters.put("command", "success");
 				answerParameters.put("message", answer);
-				System.out.println(answer);
+				log.trace(answer);
 				try {
 					stream.writeObject(answerParameters);
 					this.socket.close();
@@ -168,6 +170,8 @@ public class Server implements Runnable{
 				//get in command on message 
 				
 				requests.add(parameters);
+				log.trace("Add command "+parameters.get("command")+" from checkPoint="+parameters.get("checkPointId")
+						+ ". Clinet id="+parameters.get("userId"));
 				
 				answer = parameters.get("command")+" with clientId" +parameters.get("clientId") + " is successful added";
 				answerParameters.put("command", "success");
@@ -183,6 +187,8 @@ public class Server implements Runnable{
 			case "across":
 				//get across command on message 
 				requests.add(parameters);
+				log.trace("Add command "+parameters.get("command")+" from checkPoint="+parameters.get("checkPointId")
+						+ ". Clinet id="+parameters.get("userId"));
 				
 				answer = parameters.get("command")+" with clientId" +parameters.get("clientId") + " is successful added";
 				answerParameters.put("command", "success");
@@ -198,6 +204,8 @@ public class Server implements Runnable{
 			case "out":
 				//get out command on message 
 				requests.add(parameters);
+				log.trace("Add command "+parameters.get("command")+" from checkPoint="+parameters.get("checkPointId")
+						+ ". Clinet id="+parameters.get("userId"));
 				
 				answer = parameters.get("command")+" with clientId" +parameters.get("clientId") + " is successful added";
 				answerParameters.put("command", "success");
@@ -215,6 +223,7 @@ public class Server implements Runnable{
 				answer = parameters.get("command")+" is uknown command!";
 				answerParameters.put("command", "error");
 				answerParameters.put("message", answer);
+				log.trace(answer);
 				try {
 					stream.writeObject(answerParameters);
 				} catch (IOException e) {
@@ -262,6 +271,11 @@ public class Server implements Runnable{
 		
 	}
 	
+	/**
+	 * view check point with current id on system 
+	 * @param id
+	 * @return
+	 */
 	private boolean onSystem(int id){
 		return this.checkPointsOnline[id-1];
 	}

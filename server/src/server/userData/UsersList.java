@@ -50,4 +50,12 @@ public class UsersList {
 	public void addUser(String name, String email){
 		this.users.add(new User(this.users.size() , name, email));
 	}
+	
+	public String getEmail(int id) {
+		return this.users.get(id).getEmail();
+	}
+	
+	public String getName(int id){
+		return this.users.get(id).getName();
+	}
 }

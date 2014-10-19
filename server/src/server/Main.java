@@ -14,6 +14,8 @@ import server.checkPointsData.CheckPointsReader;
 import server.userData.UserDataReader;
 import server.userData.UserWayList;
 import server.userData.UsersList;
+import server.workers.EmailSendeWorker;
+import server.workers.QueueRequestsWorker;
 public class Main {
 	private static final Logger log = LogManager.getLogger(Main.class);
 	/**
@@ -58,9 +60,21 @@ public class Main {
 		} else {
 			serv = new Server(Integer.valueOf(args[0]), cp, requests);
 		}
-		Thread t = new Thread(serv);
-		t.setPriority(Thread.NORM_PRIORITY);
-		t.start();
+		Thread server = new Thread(serv);
+		server.setPriority(Thread.NORM_PRIORITY);
+		server.start();
+		
+		QueueRequestsWorker rw = new QueueRequestsWorker(ul, cp, requests, emails);
+		Thread requestWorker = new Thread(rw);
+		requestWorker.setPriority(Thread.NORM_PRIORITY);
+		requestWorker.start();
+		log.info("Start requestWorker! ");
+		
+		EmailSendeWorker ew = new EmailSendeWorker(ul, emails);
+		Thread emailWorker = new Thread(ew);
+		emailWorker.setPriority(Thread.NORM_PRIORITY);
+		emailWorker.start();
+		log.info("Start emailWorker!");
 	}
 	
 	/**

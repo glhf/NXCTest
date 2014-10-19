@@ -3,6 +3,9 @@ package server.userData;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import server.checkPointsData.CheckPoints;
 
 /**
@@ -11,16 +14,24 @@ import server.checkPointsData.CheckPoints;
  * 
  */
 public class UserWayList {
+	private static Logger log = LogManager.getLogger(UserWayList.class.getName());
 	
 	private CheckPoints checkPoints;//for validadion pairs of points
 	private HashMap<Integer, ArrayList<Integer>> list = new HashMap<Integer, ArrayList<Integer>>();
 	
+	/**
+	 * identify way from a to b points
+	 * 
+	 * @param userId
+	 * @param pointId
+	 * @return
+	 */
 	private boolean isValidWay(int userId, int pointId){
 		//check the way from prev poit to the point fith pointId
 		boolean rez = true;
 		//if have way from last enter point of current user 
 		//to the current id (poitId)
-		if(this.checkPoints.getPoints().get(this.list.get(userId).get(this.list.get(userId).size())).getPair().get(pointId)==null){
+		if(this.checkPoints.getPoints().get(this.list.get(userId).get(this.list.get(userId).size()-1)).getPair().get(pointId)==null){
 			rez=false;
 		}
 		return rez;
@@ -39,9 +50,9 @@ public class UserWayList {
 		//check for user in system
 		boolean rez=false;
 		if (this.list.get(userId)!=null){
-			rez = false;
-		} else {
 			rez = true;
+		} else {
+			rez = false;
 		}
 		return rez;
 	}
@@ -57,7 +68,9 @@ public class UserWayList {
 		if (!this.onSystem(userId)) {
 			this.list.put(userId, new ArrayList<Integer>());
 			this.list.get(userId).add(pointId);
-		} else { 
+			log.info("User id="+userId+" was add to system");
+		} else {
+			log.info("User id="+userId+" already in system");
 			System.out.println("User id="+userId+" already in system");
 		}
 	}
@@ -74,8 +87,12 @@ public class UserWayList {
 		Integer rez = 0;
 		this.clientAcross(userId, pointId);
 		ArrayList<Integer> temp = this.list.get(userId);
-		for (int i=1; i<=temp.size(); i++){
-			rez+=this.checkPoints.getCostRide(temp.get(i-1), temp.get(i));
+		if (temp.size()>1){
+			for (int i=1; i<=temp.size(); i++){
+				rez+=this.checkPoints.getCostRide(temp.get(i-1), temp.get(i));
+			}
+		} else if (temp.size()==1) {
+			rez=0;
 		}
 		return rez;
 	}
@@ -91,8 +108,18 @@ public class UserWayList {
 		if (isValidWay(userId, pointId)) {
 			this.list.get(userId).add(pointId);
 		} else {
-			System.out.println("No way from "+this.list.get(userId).get(this.list.get(userId).size())+" to " + pointId);
+			log.info("No way from "+this.list.get(userId).get(this.list.get(userId).size()-1)+" to " + pointId);
+			System.out.println("No way from "+this.list.get(userId).get(this.list.get(userId).size()-1)+" to " + pointId);
 		}
+	}
+	
+	public String wayToString(int id){
+		String way = "Way is: ";
+		for(int i=0; i<list.get(id).size(); i++) {
+			way+=list.get(id).get(i)+", ";
+		}
+		way+=".";
+		return way;
 	}
 	
 }

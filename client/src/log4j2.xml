@@ -17,6 +17,7 @@ Create journal log and error log appenders
             	<SizeBasedTriggeringPolicy size="1 MB" />
 			</Policies>
 		</RollingFile>
+		
 		<RollingFile name="errors-roll-file" fileName="${log-path}/errors.log" filePattern="${log-path}/errors-%d.log">
 			<PatternLayout>
 				<pattern>[%-5level] %d{HH:mm:ss.SSS} [%t] %n%m%n</pattern>
@@ -26,6 +27,7 @@ Create journal log and error log appenders
             	<SizeBasedTriggeringPolicy size="1 MB" />
 			</Policies>
 		</RollingFile>
+		
 		<Console name="console" target="SYSTEM_OUT">
 			<PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"/>
 		</Console>
@@ -33,7 +35,7 @@ Create journal log and error log appenders
 	</Appenders>
 	<Loggers>
 		<Root level="error" additivity="false">
-			<appender-ref ref="console"/>		
+			<appender-ref ref="console" level="info"/>		
 		</Root>
 		<Logger name="client.Main" level="info" additivity="false">
 			<appender-ref ref="journal-roll-file" level="info"/>

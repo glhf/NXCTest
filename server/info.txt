@@ -1,0 +1,10 @@
+server Mail Queue map:
+- name 
+- email
+- price
+- date
+- way
+
+loggin system: LOG4J2
+maven dependencis version 2.0.2 
+loggs provide 2 files: file "activity journal" and "error journal"
