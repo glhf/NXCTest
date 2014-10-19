@@ -1,6 +1,5 @@
 package client;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -8,13 +7,14 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.Map.Entry;
 import java.util.Scanner;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 public class Main {
-	public static final Logger log = Logger.getLogger(Main.class);
+	public static final Logger log = LogManager.getLogger(Main.class.getName());
 	
 	//arg 0 - id of the check point
 	public static void main(String[] args) {
@@ -34,7 +34,6 @@ public class Main {
 			pointId = Integer.valueOf(args[0]);
 			port=Integer.valueOf(args[1]);
 		}
-		
 		try { 
 			System.out.println("Waiting for conn...");
 			s = new Socket(host, port);
@@ -61,9 +60,11 @@ public class Main {
 			if (parameters.get("command").equals("error")){
 				System.out.println(parameters.get("message"));
 				System.out.println("exit...... ");
+				log.info(parameters.get("message"));
 				return;
 			} else if(parameters.get("command").equals("success")){
 				System.out.println(parameters.get("message"));
+				log.info(parameters.get("message"));
 			}
 			s.close();
 			
@@ -73,7 +74,7 @@ public class Main {
 			}
 			
 		} catch (Exception ex) { 
-			log.error("Fail!", ex);
+			log.error(ex);
 		}
 	}
 	
@@ -104,20 +105,24 @@ public class Main {
 			param.put("command", "in");
 			param.put("clientId", String.valueOf(userId));
 			param.put("checkPointId", String.valueOf(pointId));
+			log.info("Client "+ String.valueOf(userId) + " in on check point " + String.valueOf(pointId));
 			break;
 		case 2:
 			param.put("command", "across");
 			param.put("clientId", String.valueOf(userId));
 			param.put("checkPointId", String.valueOf(pointId));
+			log.info("Client "+ String.valueOf(userId) + " across check point " + String.valueOf(pointId));
 			break;
 		case 3:
 			param.put("command", "out");
 			param.put("clientId", String.valueOf(userId));
 			param.put("checkPointId", String.valueOf(pointId));
+			log.info("Client "+ String.valueOf(userId) + " across check point " + String.valueOf(pointId));
 			break;
 		case 0:
 			param.put("command", "exit");
 			param.put("checkPointId", String.valueOf(pointId));
+			log.info("Check point " + String.valueOf(pointId) + " shutdown");
 			break;
 		default:
 			break;
@@ -129,7 +134,7 @@ public class Main {
 			s.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			log.error("Fail!", e);
+			log.error(e);
 		}
 		if (cmdInd==0) {
 			System.exit(0);
@@ -143,7 +148,7 @@ public class Main {
 			oos.writeObject(param);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			log.error("Fail!", e);
+			log.error(e);
 		}
 	}
 	
@@ -154,13 +159,14 @@ public class Main {
 			HashMap<String, String> parameters = (HashMap<String, String>)ois.readObject();
 			if ( parameters.get("command")=="error") {
 				System.out.println(parameters.get("message"));
+				log.info(parameters.get("message"));
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			log.error("Fail!", e);
+			log.error(e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			log.error("Fail!", e);
+			log.error(e);
 		}
 	}
 }

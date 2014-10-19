@@ -5,18 +5,15 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.lang.annotation.Retention;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import server.checkPointsData.CheckPoints;
-import server.userData.UserWayList;
-import server.userData.UsersList;
 
 /**
  * Class server listening socket
@@ -28,7 +25,7 @@ import server.userData.UsersList;
  *
  */
 public class Server implements Runnable{
-	private static final Logger log = Logger.getLogger(Server.class);
+	private static final Logger log = LogManager.getLogger(Server.class);
 	
 
 	private int port = 7890;//port id
@@ -110,7 +107,7 @@ public class Server implements Runnable{
 				int id = Integer.valueOf(parameters.get("checkPointId"));
 				if (id!=0) {
 					if (onSystem(id)) {//already online
-						answer = "Current Id = "+id+" alredy in system.";
+						answer = "Check point "+id+" alredy in system.";
 						answerParameters.put("command", "error");
 						answerParameters.put("message", answer);
 						System.out.println(answer);
@@ -125,7 +122,7 @@ public class Server implements Runnable{
 						//add mark for check point as online registred
 						this.checkPointsOnline[id-1] = true;
 						System.out.println("Got new checkPoint");
-						answer = "Current Id = "+id+" authorize.";
+						answer = "Check point "+id+" authorize.";
 						answerParameters.put("command", "success");
 						answerParameters.put("message", answer);
 						System.out.println(answer);

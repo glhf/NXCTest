@@ -6,7 +6,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import server.checkPointsData.CheckPoints;
 import server.checkPointsData.CheckPointsReader;
@@ -14,7 +15,7 @@ import server.userData.UserDataReader;
 import server.userData.UserWayList;
 import server.userData.UsersList;
 public class Main {
-	private static final Logger log = Logger.getLogger(Main.class);
+	private static final Logger log = LogManager.getLogger(Main.class);
 	/**
 	 * Include preparing of data for open server
 	 * if data is validate open server

@@ -3,12 +3,10 @@ package server.workers;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.jws.soap.SOAPBinding.Use;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import server.checkPointsData.CheckPoints;
-import server.userData.User;
 import server.userData.UsersList;
 
 /**
@@ -18,7 +16,7 @@ import server.userData.UsersList;
  *
  */
 public class QueueRequestsWorker implements Runnable{
-	public static final Logger log = Logger.getLogger(QueueRequestsWorker.class);
+	public static final Logger log = LogManager.getLogger(QueueRequestsWorker.class);
 	
 	private UsersList ul = new UsersList();
 	private CheckPoints cp = new CheckPoints();

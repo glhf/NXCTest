@@ -1,0 +1,8 @@
+<!--
+Server log properties file
+Create journal log and error log appenders	
+ -->
+<?xml vercion="1.0" encodint="UTF-8" ?>
+<log4j:configuration debug="false" xmlns:log4j="http://jakarta.apache.org/log4j">
+	
+</log4j:configuration> 

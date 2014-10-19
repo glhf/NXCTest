@@ -3,7 +3,9 @@ package server.workers;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 import server.userData.UsersList;
 
@@ -13,7 +15,7 @@ import server.userData.UsersList;
  *
  */
 public class EmailSendeWorker implements Runnable{
-	public static final Logger log = Logger.getLogger(EmailSendeWorker.class);
+	public static final Logger log = LogManager.getLogger(EmailSendeWorker.class);
 	private UsersList ul = new UsersList();
 	private ConcurrentLinkedQueue<HashMap<String, String>> emails = new ConcurrentLinkedQueue<HashMap<String, String>>();
 	
