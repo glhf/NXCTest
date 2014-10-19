@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import server.checkPointsData.CheckPoints;
+import server.userData.UsersList;
 
 /**
  * Class server listening socket
@@ -38,6 +39,7 @@ public class Server implements Runnable{
 	private OutputStream os;
 	
 	private boolean[] checkPointsOnline;
+	private boolean[] usersOnline;
 	
 	/**
 	 * use for adding requests in queue on work 
@@ -51,13 +53,17 @@ public class Server implements Runnable{
 	 * @param cp
 	 * @param requests
 	 */
-	public Server(int port, CheckPoints cp, ConcurrentLinkedQueue<HashMap<String, String>> requests){
+	public Server(int port, UsersList ul, CheckPoints cp, ConcurrentLinkedQueue<HashMap<String, String>> requests){
 		this.port = port;
 		this.checkPoints = cp;
 		this.checkPointsOnline = new boolean[this.checkPoints.getCount()];
+		this.usersOnline = new boolean[ul.getUsers().size()];
 		this.requests = requests;
 		for (int i=0;i<this.checkPoints.getCount();i++){
 			this.checkPointsOnline[i]=false;//all check points aren`t registered on system
+		}
+		for (int i=0;i<ul.getUsers().size();i++){
+			this.usersOnline[i]=false;//all users aren`t registered on system
 		}
 		initialization();
 	}
@@ -68,12 +74,16 @@ public class Server implements Runnable{
 	 * @param cp
 	 * @param requests
 	 */
-	public Server(CheckPoints cp, ConcurrentLinkedQueue<HashMap<String, String>> requests){
+	public Server(UsersList ul, CheckPoints cp, ConcurrentLinkedQueue<HashMap<String, String>> requests){
 		this.checkPoints = cp;
 		this.checkPointsOnline = new boolean[this.checkPoints.getCount()];
+		this.usersOnline = new boolean[ul.getUsers().size()];
 		this.requests = requests;
 		for (int i=0;i<this.checkPoints.getCount();i++){
 			this.checkPointsOnline[i]=false;//all check points aren`t registered on system
+		}
+		for (int i=0;i<ul.getUsers().size();i++){
+			this.usersOnline[i]=false;//all users aren`t registered on system
 		}
 		initialization();
 	}
@@ -90,6 +100,7 @@ public class Server implements Runnable{
 	void parse(ObjectOutputStream stream, HashMap<String, String> parameters, ConcurrentLinkedQueue<HashMap<String, String>> requests) {
 		HashMap<String, String> answerParameters = new HashMap<String, String>();
 		String answer;
+		int userId = 0;
 		if (parameters.size()<2){ //if we have no much parametrs in collections send back error
 			try {
 				answer = "Wrong count of args!";
@@ -103,12 +114,12 @@ public class Server implements Runnable{
 			}
 		} else { //if enough parameters 
 			
+			int checkPointid = Integer.valueOf(parameters.get("checkPointId"));
 			switch (parameters.get("command")) {
 			case "init":
-				int id = Integer.valueOf(parameters.get("checkPointId"));
-				if (id!=0) {
-					if (onSystem(id)) {//already online
-						answer = "Check point "+id+" alredy in system.";
+				if (checkPointid!=0) {
+					if (checkPointOnSystem(checkPointid)) {//already online
+						answer = "Check point "+checkPointid+" alredy in system.";
 						answerParameters.put("command", "error");
 						answerParameters.put("message", answer);
 						log.trace(answer);
@@ -121,9 +132,9 @@ public class Server implements Runnable{
 						
 					} else {
 						//add mark for check point as online registred
-						this.checkPointsOnline[id-1] = true;
+						this.checkPointsOnline[checkPointid-1] = true;
 						System.out.println("Got new checkPoint");
-						answer = "Check point "+id+" authorize.";
+						answer = "Check point "+checkPointid+" authorize.";
 						answerParameters.put("command", "success");
 						answerParameters.put("message", answer);
 						log.trace(answer);
@@ -134,7 +145,7 @@ public class Server implements Runnable{
 							log.error("Fail ",e);
 						}
 					}
-				} else if (id==0){ //if checkPointId=0 then send back error
+				} else if (checkPointid==0){ //if checkPointId=0 then send back error
 					answer = parameters.get("")+" is wrong Id";
 					answerParameters.put("checkPointId", "error");
 					answerParameters.put("message", answer);
@@ -149,11 +160,11 @@ public class Server implements Runnable{
 				break;
 				
 			case "exit":
-				id = Integer.valueOf(parameters.get("checkPointId"));
-				System.out.println(id+ " off point ");
-				this.checkPointsOnline[id-1] = false;
-				System.out.println("checkPoint id = "+id+ " is offline ");
-				answer = "checkPoint id = "+id+ " is offline ";
+				checkPointid = Integer.valueOf(parameters.get("checkPointId"));
+				System.out.println(checkPointid+ " off point ");
+				this.checkPointsOnline[checkPointid] = false;
+				System.out.println("checkPoint id = "+checkPointid+ " is offline ");
+				answer = "checkPoint id = "+checkPointid+ " is offline ";
 				answerParameters.put("command", "success");
 				answerParameters.put("message", answer);
 				log.trace(answer);
@@ -167,55 +178,103 @@ public class Server implements Runnable{
 				break;
 				
 			case "in":
+				userId = Integer.valueOf(parameters.get("clientId"));
 				//get in command on message 
-				
-				requests.add(parameters);
-				log.trace("Add command "+parameters.get("command")+" from checkPoint="+parameters.get("checkPointId")
+				if (!userOnSystem(userId)){
+					System.out.println("User "+userId+" on system");
+					requests.add(parameters);
+					answer = parameters.get("command")+" with clientId" +parameters.get("clientId") + " is successful added";
+					answerParameters.put("command", "success");
+					answerParameters.put("message", answer);
+					log.trace("Add command "+parameters.get("command")+" from checkPoint="+parameters.get("checkPointId")
 						+ ". Clinet id="+parameters.get("userId"));
-				
-				answer = parameters.get("command")+" with clientId" +parameters.get("clientId") + " is successful added";
-				answerParameters.put("command", "success");
-				answerParameters.put("message", answer);
-				try {
-					stream.writeObject(answerParameters);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					log.error("Fail ",e);
-				}
+					try {
+						stream.writeObject(answerParameters);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						log.error("Fail ",e);
+					}
+				} else {
+					answer = "ClientId " +parameters.get("clientId") + " is already online";
+					answerParameters.put("command", "error");
+					answerParameters.put("message", answer);
+					log.trace("Clinet id="+parameters.get("userId")+" is offline");
+					System.out.println("User "+userId+" isn`t on system");
+					try {
+						stream.writeObject(answerParameters);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						log.error("Fail ",e);
+					}
+				}			
 				break;
+				
 				
 			case "across":
 				//get across command on message 
-				requests.add(parameters);
-				log.trace("Add command "+parameters.get("command")+" from checkPoint="+parameters.get("checkPointId")
-						+ ". Clinet id="+parameters.get("userId"));
-				
-				answer = parameters.get("command")+" with clientId" +parameters.get("clientId") + " is successful added";
-				answerParameters.put("command", "success");
-				answerParameters.put("message", answer);
-				try {
-					stream.writeObject(answerParameters);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					log.error("Fail ",e);
+				userId = Integer.valueOf(parameters.get("clientId"));
+				answerParameters = new HashMap<String, String>();
+				if (userOnSystem(userId)){
+					System.out.println("User "+userId+" on system");
+					requests.add(parameters);					
+					answer = parameters.get("command")+" with clientId" +parameters.get("clientId") + " is successful added";
+					answerParameters.put("command", "success");
+					answerParameters.put("message", answer);
+					log.trace("Add command "+parameters.get("command")+" from checkPoint="+parameters.get("checkPointId")
+							+ ". Clinet id="+parameters.get("userId"));
+					try {
+						stream.writeObject(answerParameters);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						log.error("Fail ",e);
+					}	
+				} else {
+					answer = "ClientId " +parameters.get("clientId") + " is off";
+					answerParameters.put("command", "error");
+					answerParameters.put("message", answer);
+					log.trace("Clinet id="+parameters.get("userId")+" is offline");
+					System.out.println("User "+userId+" isn`t on system");
+					try {
+						stream.writeObject(answerParameters);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						log.error("Fail ",e);
+					}
 				}
 				break;
 				
 			case "out":
 				//get out command on message 
-				requests.add(parameters);
-				log.trace("Add command "+parameters.get("command")+" from checkPoint="+parameters.get("checkPointId")
-						+ ". Clinet id="+parameters.get("userId"));
-				
-				answer = parameters.get("command")+" with clientId" +parameters.get("clientId") + " is successful added";
-				answerParameters.put("command", "success");
-				answerParameters.put("message", answer);
-				try {
-					stream.writeObject(answerParameters);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					log.error("Fail ",e);
+				userId = Integer.valueOf(parameters.get("clientId"));
+				if (userOnSystem(userId)){
+					System.out.println("User "+userId+" on system");
+					answer = parameters.get("command")+" with clientId" +parameters.get("clientId") + " is successful added";
+					answerParameters.put("command", "success");
+					answerParameters.put("message", answer);
+					requests.add(parameters);
+					log.trace("Add command "+parameters.get("command")+" from checkPoint="+parameters.get("checkPointId")
+							+ ". Clinet id="+parameters.get("userId")+". User off!");
+					this.usersOnline[userId-1]=false;
+					try {
+						stream.writeObject(answerParameters);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						log.error("Fail ",e);
+					}
+				} else {
+					System.out.println("User "+userId+" isn`t on system");
+					answer = "ClientId " +parameters.get("clientId") + " is off";
+					answerParameters.put("command", "error");
+					answerParameters.put("message", answer);
+					log.trace("Clinet id="+parameters.get("userId")+" is offline");
+					try {
+						stream.writeObject(answerParameters);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						log.error("Fail ",e);
+					}
 				}
+				
 				break;
 				
 			default:
@@ -276,8 +335,12 @@ public class Server implements Runnable{
 	 * @param id
 	 * @return
 	 */
-	private boolean onSystem(int id){
+	private boolean checkPointOnSystem(int id){
 		return this.checkPointsOnline[id-1];
+	}
+	
+	private boolean userOnSystem(int id){
+		return this.usersOnline[id-1];
 	}
 
 }

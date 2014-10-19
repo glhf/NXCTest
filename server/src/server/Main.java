@@ -56,9 +56,9 @@ public class Main {
 		//start server
 		Server serv;
 		if (args.length==0){
-			serv = new Server(cp, requests);
+			serv = new Server(ul, cp, requests);
 		} else {
-			serv = new Server(Integer.valueOf(args[0]), cp, requests);
+			serv = new Server(Integer.valueOf(args[0]), ul, cp, requests);
 		}
 		Thread server = new Thread(serv);
 		server.setPriority(Thread.NORM_PRIORITY);

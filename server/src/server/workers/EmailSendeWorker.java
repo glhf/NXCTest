@@ -31,10 +31,12 @@ public class EmailSendeWorker implements Runnable{
 		while (true) {
 			if (!emails.isEmpty()){
 				//do itaration with send 
-				HashMap<String, String> temp = emails.poll();
+				/*HashMap<String, String> temp = emails.poll();
 				int userId = Integer.valueOf(temp.get("userId"));
 				int checkPointId = Integer.valueOf(temp.get("checkPointId"));
 				//input methods of patrsing data and send emals
+				 * */
+				 
 			}
 		}
 	}

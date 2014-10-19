@@ -117,7 +117,7 @@ public class Main {
 			param.put("command", "out");
 			param.put("clientId", String.valueOf(userId));
 			param.put("checkPointId", String.valueOf(pointId));
-			log.info("Client "+ String.valueOf(userId) + " across check point " + String.valueOf(pointId));
+			log.info("Client "+ String.valueOf(userId) + " out on check point " + String.valueOf(pointId));
 			break;
 		case 0:
 			param.put("command", "exit");
