@@ -34,10 +34,10 @@ Create journal log and error log appenders
 		
 	</Appenders>
 	<Loggers>
-		<Root level="error" additivity="false">
-			<appender-ref ref="console" level="info"/>		
+		<Root level="trace" additivity="true">
+			<appender-ref ref="console" level="trace"/>		
 		</Root>
-		<Logger name="client.Main" level="info" additivity="false">
+		<Logger name="client.Main" level="info" additivity="true">
 			<appender-ref ref="journal-roll-file" level="info"/>
 			<appender-ref ref="errors-roll-file" level="error"/>
 		</Logger>
