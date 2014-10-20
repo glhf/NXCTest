@@ -2,6 +2,7 @@ package server.userData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -31,8 +32,13 @@ public class UserWayList {
 		boolean rez = true;
 		//if have way from last enter point of current user 
 		//to the current id (poitId)
-		if(this.checkPoints.getPoints().get(this.list.get(userId).get(this.list.get(userId).size()-1)).getPair().get(pointId)==null){
-			rez=false;
+		if (this.list.get(userId).size()!=0) {
+			System.out.println(this.checkPoints.getPoints().get(this.list.get(userId).get(this.list.get(userId).size()-1)).getPair().get(pointId));
+			if(this.checkPoints.getPoints().get(this.list.get(userId).get(this.list.get(userId).size()-1)).getPair().get(pointId)==null){
+				rez=false;
+			}
+		} else {
+			rez = false;
 		}
 		return rez;
 	}
@@ -63,15 +69,20 @@ public class UserWayList {
 	 * @param userId user id 
 	 * @param pointId start point id
 	 */
-	public void clientOn(int userId, int pointId){
+	public boolean clientOn(int userId, int pointId){
 		// add user to the system
 		if (!this.onSystem(userId)) {
 			this.list.put(userId, new ArrayList<Integer>());
 			this.list.get(userId).add(pointId);
-			log.info("User id="+userId+" was add to system");
+			Iterator it = this.list.get(userId).iterator();
+			String t = "user was ";
+			while(it.hasNext()){
+				t += it.next()+",";
+			}
+			log.trace(t);
+			return true;
 		} else {
-			log.info("User id="+userId+" already in system");
-			System.out.println("User id="+userId+" already in system");
+			return false;
 		}
 	}
 	
@@ -87,13 +98,15 @@ public class UserWayList {
 		Integer rez = 0;
 		this.clientAcross(userId, pointId);
 		ArrayList<Integer> temp = this.list.get(userId);
+
 		if (temp.size()>1){
-			for (int i=1; i<=temp.size(); i++){
+			for (int i=1; i<temp.size(); i++){
 				rez+=this.checkPoints.getCostRide(temp.get(i-1), temp.get(i));
 			}
 		} else if (temp.size()==1) {
 			rez=0;
 		}
+		log.trace("Price for user = "+userId+" is "+rez);
 		return rez;
 	}
 	
@@ -103,23 +116,42 @@ public class UserWayList {
 	 * @param userId
 	 * @param pointId
 	 */
-	public void clientAcross(int userId, int pointId){
+	public boolean clientAcross(int userId, int pointId){
 		//add poitId to list for userId
 		if (isValidWay(userId, pointId)) {
 			this.list.get(userId).add(pointId);
+			Iterator it = this.list.get(userId).iterator();
+			String t = "user was ";
+			while(it.hasNext()){
+				t += it.next()+",";
+			}
+			log.trace(t);
+			return true;
 		} else {
-			log.info("No way from "+this.list.get(userId).get(this.list.get(userId).size()-1)+" to " + pointId);
-			System.out.println("No way from "+this.list.get(userId).get(this.list.get(userId).size()-1)+" to " + pointId);
+			return false;
 		}
 	}
 	
+	/**
+	 * convert user`s way from array list sequence to string
+	 * @param id
+	 * @return
+	 */
 	public String wayToString(int id){
-		String way = "Way is: ";
-		for(int i=0; i<list.get(id).size(); i++) {
-			way+=list.get(id).get(i)+", ";
+		String way = "way is: ";
+		Iterator it = this.list.get(id).iterator();
+		while(it.hasNext()){
+			way+=it.next().toString()+", ";
 		}
 		way+=".";
 		return way;
 	}
 	
+	/**
+	 * remove user from list when it out
+	 * @param id user id
+	 */
+	public void removeUser(int id){
+		this.list.remove(id);
+	}
 }

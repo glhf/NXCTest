@@ -45,6 +45,8 @@ public class Main {
 			log.error("User data read faild ", e);
 		}
 		
+		//log.trace(cp.getPoints().get(2).getPair().get(6));//get pair return 8
+		
 		//if there are`t data files
 		ifXmlFilesDontExists(cp, ul);
 		
@@ -68,13 +70,13 @@ public class Main {
 		Thread requestWorker = new Thread(rw);
 		requestWorker.setPriority(Thread.NORM_PRIORITY);
 		requestWorker.start();
-		log.info("Start requestWorker! ");
+		log.trace("Start requestWorker! ");
 		
 		EmailSendeWorker ew = new EmailSendeWorker(ul, emails);
 		Thread emailWorker = new Thread(ew);
 		emailWorker.setPriority(Thread.NORM_PRIORITY);
 		emailWorker.start();
-		log.info("Start emailWorker!");
+		log.trace("Start emailWorker!");
 	}
 	
 	/**

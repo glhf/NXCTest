@@ -25,8 +25,8 @@ public class Main {
 		 int pointId = 0;
 		 int port = 7890;
 		if (args.length==0){
-			System.out.println(args.length);
-			System.out.println(new IllegalArgumentException("Wrong count of argumets! No id of check point.").getMessage());
+			log.trace(args.length);
+			log.trace(new IllegalArgumentException("Wrong count of argumets! No id of check point.").getMessage());
 			return;
 		} else if (args.length==1) {
 			pointId=Integer.valueOf(args[0]);
@@ -35,10 +35,9 @@ public class Main {
 			port=Integer.valueOf(args[1]);
 		}
 		try { 
-			System.out.println("Waiting for conn...");
+			log.trace("Waiting for conn...");
 			s = new Socket(host, port);
-			System.out.println("Get conn...");
-			
+			log.trace("Get conn...");
 			ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 			ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
 			
@@ -49,22 +48,20 @@ public class Main {
 			parameters.put("checkPointId", String.valueOf(pointId));
 			
 			oos.writeObject(parameters);
-			System.out.println("Send initialiation data...");
+			log.trace("Send initialiation data...");
 			oos.flush();
 					
 			//get recent info if command = error 
 			parameters.clear();
-			System.out.println("Recive answe...");
+			log.trace("Recive answe...");
 			parameters = (HashMap<String, String>) ois.readObject();
 			
 			if (parameters.get("command").equals("error")){
-				System.out.println(parameters.get("message"));
-				System.out.println("exit...... ");
-				log.info(parameters.get("message"));
+				log.trace(parameters.get("message"));
+				log.trace("exit...... ");
 				return;
 			} else if(parameters.get("command").equals("success")){
-				System.out.println(parameters.get("message"));
-				log.info(parameters.get("message"));
+				log.trace(parameters.get("message"));
 			}
 			s.close();
 			
@@ -92,7 +89,7 @@ public class Main {
 		Scanner in = new Scanner(System.in);
 		String cmd;
 		cmd = in.nextLine();
-		System.out.println("Have "+cmd);
+		log.trace("Have "+cmd);
 		String[] split = cmd.split(" ");
 		int cmdInd = Integer.valueOf(split[0]);
 		int userId = 0;
@@ -146,6 +143,7 @@ public class Main {
 	static void sendData(ObjectOutputStream oos, HashMap<String, String> param){
 		try {
 			oos.writeObject(param);
+			log.trace("Send clientId = "+param.get("clientId"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			log.error(e);
@@ -158,7 +156,7 @@ public class Main {
 		try {
 			HashMap<String, String> parameters = (HashMap<String, String>)ois.readObject();
 			if ( parameters.get("command")=="error") {
-				System.out.println(parameters.get("message"));
+				log.trace(parameters.get("message"));
 				log.info(parameters.get("message"));
 			}
 		} catch (ClassNotFoundException e) {

@@ -52,6 +52,8 @@ public class QueueRequestsWorker implements Runnable{
 		// TODO Auto-generated method stub
 		HashMap<String, String> temp = new HashMap<String, String>();
 		String tempCommand = new String();
+		boolean flag;
+		
 		while (true){
 			if (!requests.isEmpty()){
 				//code that compute 
@@ -59,25 +61,43 @@ public class QueueRequestsWorker implements Runnable{
 				tempCommand = temp.get("command");
 				switch (tempCommand) {
 				case "in":
-					this.wayList.clientOn(Integer.valueOf(temp.get("clientId")), Integer.valueOf(temp.get("checkPointId")));
-					log.info("Client "+temp.get("clientId")+ " is \"on\"  on " + temp.get("checkPointId") +" checkPoint");
+					flag = this.wayList.clientOn(Integer.valueOf(temp.get("clientId")), Integer.valueOf(temp.get("checkPointId")));
+					if (flag) {
+						log.info("Client "+temp.get("clientId")+ " is \"on\"  on " 
+								+ temp.get("checkPointId") +" checkPoint. was add to system");
+					} else {
+						log.info("Client "+temp.get("clientId")+ " is not \"on\"  on " 
+								+ temp.get("checkPointId") +" checkPoint - he is already on system");
+					}
 					break;
 
 				case "across":
-					this.wayList.clientAcross(Integer.valueOf(temp.get("clientId")), Integer.valueOf(temp.get("checkPointId")));
-					log.info("Client "+temp.get("clientId")+ " is \"acroos\" " + temp.get("checkPointId") +" checkPoint");
+					flag = this.wayList.clientAcross(Integer.valueOf(temp.get("clientId")), Integer.valueOf(temp.get("checkPointId")));
+					if (flag){
+						log.info("Client "+temp.get("clientId")+ " is \"acroos\" " 
+								+ temp.get("checkPointId") +" checkPoint");
+					} else {
+						log.info("Client "+temp.get("clientId")+ " is not \"acroos\" " 
+								+ temp.get("checkPointId") +" checkPoint. No avaliable way.");
+					}
 					break;
 					
 				case "out": 
-					this.wayList.clientOut(Integer.valueOf(temp.get("clientId")), Integer.valueOf(temp.get("checkPointId")));
+					
+					int price = this.wayList.clientOut(Integer.valueOf(temp.get("clientId")), Integer.valueOf(temp.get("checkPointId")));
+					String way = this.wayList.wayToString(Integer.valueOf(temp.get("clientId")));
+					this.wayList.removeUser(Integer.valueOf(temp.get("clientId")));
 					log.info("Client "+temp.get("clientId")+ " is \"out\"  on " + temp.get("checkPointId") +" checkPoint");
 					HashMap<String, String> tempInfo = new HashMap<String, String>();
+					
 					tempInfo.put("name", ul.getName(Integer.valueOf(temp.get("clientId"))));//put name of user
+					
 					tempInfo.put("email", ul.getEmail(Integer.valueOf(temp.get("clientId"))));
-					tempInfo.put("price", String.valueOf(this.wayList.clientOut(Integer.valueOf(temp.get("clientId")), 
-							Integer.valueOf(temp.get("checkPointId")))));
+					
+					tempInfo.put("price", String.valueOf(price));
+					
 					tempInfo.put("date", (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date()).toString()));
-					log.info("User "+temp.get("clientId")+" get"+this.wayList.wayToString(Integer.valueOf(temp.get("clientId"))));
+					log.info("User "+temp.get("clientId")+" "+way);
 					emails.add(tempInfo );
 					break;
 				

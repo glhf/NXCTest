@@ -35,9 +35,9 @@ Create journal log and error log appenders
 	</Appenders>
 	<Loggers>
 		<Root level="trace" additivity="true">
-			<appender-ref ref="console" level="trace"/>		
+			<appender-ref ref="console"/>		
 		</Root>
-		<Logger name="client.Main" level="info" additivity="true">
+		<Logger name="client.Main" level="trace" additivity="true">
 			<appender-ref ref="journal-roll-file" level="info"/>
 			<appender-ref ref="errors-roll-file" level="error"/>
 		</Logger>

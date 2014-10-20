@@ -32,10 +32,10 @@ Create journal log and error log appenders
 		
 	</Appenders>
 	<Loggers>
-		<Root level="trace" additivity="false">
+		<Root level="trace" additivity="true">
 			<appender-ref ref="console"/>		
 		</Root>
-		<Logger name="server" level="info" additivity="true">
+		<Logger name="server" level="trace" additivity="true">
 			<appender-ref ref="journal-roll-file" level="info"/>
 			<appender-ref ref="errors-roll-file" level="error"/>
 		</Logger>
@@ -43,7 +43,7 @@ Create journal log and error log appenders
 			<appender-ref ref="journal-roll-file" level="info"/>
 			<appender-ref ref="errors-roll-file" level="error"/>
 		</Logger> -->
-		<Logger name="server.workers" level="info" additivity="true">
+		<Logger name="server.workers" level="trace" additivity="true">
 			<appender-ref ref="journal-roll-file" level="info"/>
 			<appender-ref ref="errors-roll-file" level="error"/>
 		</Logger>
