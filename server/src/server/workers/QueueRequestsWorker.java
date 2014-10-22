@@ -89,15 +89,16 @@ public class QueueRequestsWorker implements Runnable{
 					this.wayList.removeUser(Integer.valueOf(temp.get("clientId")));
 					log.info("Client "+temp.get("clientId")+ " is \"out\"  on " + temp.get("checkPointId") +" checkPoint");
 					HashMap<String, String> tempInfo = new HashMap<String, String>();
-					
+					//log.trace("Email request addet to request queue");
 					tempInfo.put("name", ul.getName(Integer.valueOf(temp.get("clientId"))));//put name of user
-					
+					//log.trace("name "+ul.getName(Integer.valueOf(temp.get("clientId"))));
 					tempInfo.put("email", ul.getEmail(Integer.valueOf(temp.get("clientId"))));
-					
+					//log.trace("email "+ul.getEmail(Integer.valueOf(temp.get("clientId"))));
 					tempInfo.put("price", String.valueOf(price));
-					
+					//log.trace("price "+ String.valueOf(price));
 					tempInfo.put("date", (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date()).toString()));
-					log.info("User "+temp.get("clientId")+" "+way);
+					//log.trace("date "+(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date()).toString()));
+					//log.trace("User "+temp.get("clientId")+" "+way);
 					emails.add(tempInfo );
 					break;
 				
